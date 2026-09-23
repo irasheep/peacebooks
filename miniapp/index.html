@@ -12,63 +12,104 @@
 
 <body>
     <main class="app">
-        <header class="topbar">
-            <div>
-                <p class="eyebrow">БИБЛИОТЕКА В МИРЕ</p>
-                <h1>Книги Мира</h1>
-            </div>
+        <section class="screen is-active" id="home-screen">
+            <header class="topbar">
+                <div>
+                    <p class="eyebrow">БИБЛИОТЕКА В МИРЕ</p>
+                    <h1>Книги Мира</h1>
+                </div>
 
-            <div class="avatar" id="avatar" aria-hidden="true">К</div>
-        </header>
+                <div class="avatar" id="avatar" aria-hidden="true">К</div>
+            </header>
 
-        <section class="welcome-card">
-            <div class="welcome-copy">
-                <p class="greeting" id="greeting">Привет!</p>
-                <p class="username" id="username">Рада видеть тебя в библиотеке.</p>
+            <section class="welcome-card">
+                <div class="welcome-copy">
+                    <p class="greeting" id="greeting">Привет!</p>
+                    <p class="username" id="username">Рада видеть тебя в библиотеке.</p>
 
-                <h2>Хочешь почитать?</h2>
-            </div>
+                    <h2>Хочешь почитать?</h2>
+                </div>
 
-            <button class="primary-button" id="catalog-button" type="button">
-                Смотреть книги
-                <span aria-hidden="true">→</span>
+                <button class="primary-button" id="catalog-button" type="button">
+                    Смотреть книги
+                    <span aria-hidden="true">→</span>
+                </button>
+            </section>
+
+            <section class="rules" aria-label="Правила библиотеки">
+                <div class="section-heading">
+                    <p class="eyebrow">КАК ЭТО РАБОТАЕТ</p>
+                </div>
+
+                <div class="rules-grid">
+                    <article class="rule-card">
+                        <strong>1</strong>
+                        <span>книга<br>за раз</span>
+                    </article>
+
+                    <article class="rule-card">
+                        <strong>30</strong>
+                        <span>дней<br>на чтение</span>
+                    </article>
+
+                    <article class="rule-card">
+                        <strong>+30</strong>
+                        <span>дней<br>продления</span>
+                    </article>
+                </div>
+            </section>
+
+            <button class="return-button" id="return-button" type="button">
+                <span class="return-icon" aria-hidden="true">↗</span>
+
+                <span class="return-copy">
+                    <strong>Вернуть книгу</strong>
+                    <small>Отправить фото книги на полке</small>
+                </span>
+
+                <span class="return-arrow" aria-hidden="true">→</span>
             </button>
         </section>
 
-        <section class="rules" aria-label="Правила библиотеки">
-            <div class="section-heading">
-                <p class="eyebrow">КАК ЭТО РАБОТАЕТ</p>
-            </div>
+        <section class="screen" id="catalog-screen" aria-labelledby="catalog-title">
+            <header class="screen-header">
+                <button class="back-link" id="catalog-home-button" type="button">← На главную</button>
+                <p class="eyebrow">КНИГИ МИРА</p>
+                <h1 id="catalog-title">Каталог</h1>
+                <p class="screen-subtitle">Доступные книги — первыми. Листай вниз и выбирай.</p>
+            </header>
 
-            <div class="rules-grid">
-                <article class="rule-card">
-                    <strong>1</strong>
-                    <span>книга<br>за раз</span>
-                </article>
-
-                <article class="rule-card">
-                    <strong>30</strong>
-                    <span>дней<br>на чтение</span>
-                </article>
-
-                <article class="rule-card">
-                    <strong>+30</strong>
-                    <span>дней<br>продления</span>
-                </article>
-            </div>
+            <div class="catalog-message" id="catalog-message">Загружаю книги…</div>
+            <div class="catalog-grid" id="catalog-grid" aria-live="polite"></div>
         </section>
 
-        <button class="return-button" id="return-button" type="button">
-            <span class="return-icon" aria-hidden="true">↗</span>
+        <section class="screen" id="book-screen" aria-labelledby="book-title">
+            <button class="back-link detail-back" id="book-back-button" type="button">← В каталог</button>
 
-            <span class="return-copy">
-                <strong>Вернуть книгу</strong>
-                <small>Отправить фото книги на полке</small>
-            </span>
+            <article class="book-detail">
+                <div class="detail-cover-wrap">
+                    <img class="detail-cover" id="book-cover" src="" alt="">
+                </div>
 
-            <span class="return-arrow" aria-hidden="true">→</span>
-        </button>
+                <div class="detail-content">
+                    <span class="status-badge" id="book-status"></span>
+                    <h1 class="detail-title" id="book-title"></h1>
+                    <p class="detail-author" id="book-author"></p>
 
+                    <div class="annotation-block">
+                        <p class="eyebrow">О КНИГЕ</p>
+                        <p class="annotation" id="book-annotation"></p>
+                    </div>
+
+                    <button class="primary-button borrow-button" id="borrow-button" type="button">
+                        Взять книгу
+                        <span aria-hidden="true">→</span>
+                    </button>
+
+                    <p class="unavailable-note" id="unavailable-note">Сейчас книга на руках.</p>
+                </div>
+            </article>
+        </section>
     </main>
 
     <script src="app.js"></script>
