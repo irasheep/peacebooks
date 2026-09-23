@@ -4,17 +4,20 @@
     --mir-pink: #ef7be7;
     --mir-lime: #dceb3f;
     --mir-blue: #4053d8;
-
     --white: #ffffff;
+    --soft-line: rgba(35, 66, 54, 0.16);
 }
 
 * {
     box-sizing: border-box;
 }
 
+html {
+    background: var(--mir-cream);
+}
+
 body {
     margin: 0;
-
     min-height: 100vh;
 
     display: flex;
@@ -23,52 +26,275 @@ body {
     background: var(--mir-cream);
     color: var(--mir-green);
 
-    font-family: Arial, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+textarea {
+    font: inherit;
 }
 
 .app {
     width: 100%;
     max-width: 440px;
+    min-height: 100vh;
 
-    padding: 32px 20px 80px;
+    padding:
+        max(28px, env(safe-area-inset-top))
+        20px
+        max(48px, env(safe-area-inset-bottom));
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 28px;
+}
+
+.eyebrow {
+    margin: 0 0 6px;
+
+    font-size: 11px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: 1.4px;
+}
+
+h1,
+h2,
+p {
+    margin-top: 0;
 }
 
 h1 {
-    margin: 0 0 8px;
+    margin-bottom: 0;
 
-    font-size: 36px;
+    font-size: 30px;
     line-height: 1;
-
-    color: var(--mir-green);
+    letter-spacing: -1px;
 }
 
-.app > p {
-    margin: 0 0 32px;
+.avatar {
+    width: 48px;
+    height: 48px;
 
-    color: var(--mir-green);
-    opacity: 0.65;
-}
-
-button {
-    width: 100%;
-
-    padding: 18px 24px;
+    display: grid;
+    place-items: center;
 
     border: 3px solid var(--mir-green);
-    border-radius: 18px;
+    border-radius: 50%;
+
+    background: var(--mir-blue);
+    color: var(--mir-lime);
+
+    font-size: 20px;
+    font-weight: 900;
+
+    box-shadow: 3px 3px 0 var(--mir-green);
+}
+
+.welcome-card {
+    padding: 24px;
+
+    border: 3px solid var(--mir-green);
+    border-radius: 28px;
+
+    background: var(--white);
+
+    box-shadow: 5px 5px 0 var(--mir-green);
+}
+
+.greeting {
+    margin-bottom: 4px;
+
+    color: var(--mir-green);
+
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.username {
+    margin-bottom: 26px;
+
+    color: rgba(35, 66, 54, 0.6);
+
+    font-size: 14px;
+}
+
+h2 {
+    margin-bottom: 28px;
+
+    font-size: clamp(34px, 9vw, 44px);
+    line-height: 0.98;
+    letter-spacing: -1.8px;
+}
+
+.primary-button {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 17px 20px;
+
+    border: 3px solid var(--mir-green);
+    border-radius: 17px;
 
     background: var(--mir-pink);
     color: var(--mir-green);
 
+    font-weight: 900;
     font-size: 16px;
-    font-weight: 700;
 
     cursor: pointer;
 
     box-shadow: 4px 4px 0 var(--mir-green);
 }
 
-button:active {
+.primary-button span {
+    font-size: 22px;
+    line-height: 1;
+}
+
+.primary-button:active {
     transform: translate(2px, 2px);
     box-shadow: 2px 2px 0 var(--mir-green);
+}
+
+.rules {
+    margin-top: 36px;
+}
+
+.section-heading {
+    margin-bottom: 12px;
+}
+
+.rules-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.rule-card {
+    min-height: 112px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    padding: 14px 12px;
+
+    border: 3px solid var(--mir-green);
+    border-radius: 20px;
+
+    color: var(--mir-green);
+
+    box-shadow: 3px 3px 0 var(--mir-green);
+}
+
+.rule-card strong {
+    font-size: 30px;
+    line-height: 1;
+}
+
+.rule-card span {
+    font-size: 12px;
+    line-height: 1.15;
+    font-weight: 800;
+}
+
+.rule-pink {
+    background: var(--mir-pink);
+}
+
+.rule-lime {
+    background: var(--mir-lime);
+}
+
+.rule-blue {
+    background: var(--mir-blue);
+    color: var(--white);
+}
+
+.note-card {
+    margin-top: 22px;
+
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+
+    padding: 18px;
+
+    border: 3px solid var(--mir-green);
+    border-radius: 22px;
+
+    background: var(--white);
+}
+
+.note-icon {
+    width: 38px;
+    height: 38px;
+
+    flex: 0 0 38px;
+
+    display: grid;
+    place-items: center;
+
+    border: 3px solid var(--mir-green);
+    border-radius: 12px;
+
+    background: var(--mir-lime);
+
+    font-size: 18px;
+    font-weight: 900;
+}
+
+.note-card strong {
+    display: block;
+    margin-bottom: 5px;
+
+    font-size: 15px;
+}
+
+.note-card p {
+    margin-bottom: 0;
+
+    color: rgba(35, 66, 54, 0.68);
+
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.telegram-status {
+    min-height: 16px;
+
+    margin: 18px 4px 0;
+
+    color: rgba(35, 66, 54, 0.45);
+
+    font-size: 11px;
+    text-align: center;
+}
+
+@media (max-width: 360px) {
+    .app {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .welcome-card {
+        padding: 20px;
+    }
+
+    .rules-grid {
+        gap: 7px;
+    }
+
+    .rule-card {
+        padding: 12px 10px;
+    }
 }
