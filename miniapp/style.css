@@ -189,7 +189,7 @@ h2 {
     min-width: 0;
     padding: 18px 10px 16px;
 
-    border: 0;
+    border: 1.5px solid var(--soft-line);
     border-radius: 18px;
 
     background: var(--white);
