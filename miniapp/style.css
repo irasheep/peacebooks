@@ -99,12 +99,10 @@ h1 {
 .welcome-card {
     padding: 24px;
 
-    border: 3px solid var(--mir-green);
+    border: 0;
     border-radius: 28px;
 
     background: var(--white);
-
-    box-shadow: 5px 5px 0 var(--mir-green);
 }
 
 .greeting {
@@ -160,7 +158,8 @@ h2 {
     line-height: 1;
 }
 
-.primary-button:active {
+.primary-button:active,
+.return-button:active {
     transform: translate(2px, 2px);
     box-shadow: 2px 2px 0 var(--mir-green);
 }
@@ -173,73 +172,84 @@ h2 {
     margin-bottom: 12px;
 }
 
-.rules-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+.rules-list {
+    display: flex;
+    flex-direction: column;
     gap: 10px;
 }
 
-.rule-card {
-    min-height: 112px;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-
-    padding: 14px 12px;
-
-    border: 3px solid var(--mir-green);
-    border-radius: 20px;
-
-    color: var(--mir-green);
-
-    box-shadow: 3px 3px 0 var(--mir-green);
-}
-
-.rule-card strong {
-    font-size: 30px;
-    line-height: 1;
-}
-
-.rule-card span {
-    font-size: 12px;
-    line-height: 1.15;
-    font-weight: 800;
-}
-
-.rule-pink {
-    background: var(--mir-pink);
-}
-
-.rule-lime {
-    background: var(--mir-lime);
-}
-
-.rule-blue {
-    background: var(--mir-blue);
-    color: var(--white);
-}
-
-.note-card {
-    margin-top: 22px;
-
+.info-card {
     display: flex;
     gap: 14px;
     align-items: flex-start;
 
-    padding: 18px;
+    padding: 16px;
 
     border: 3px solid var(--mir-green);
-    border-radius: 22px;
+    border-radius: 20px;
 
     background: var(--white);
 }
 
-.note-icon {
-    width: 38px;
+.info-number {
+    min-width: 46px;
     height: 38px;
 
-    flex: 0 0 38px;
+    display: grid;
+    place-items: center;
+
+    border-radius: 12px;
+
+    background: var(--mir-cream);
+    color: var(--mir-green);
+
+    font-size: 18px;
+    font-weight: 900;
+}
+
+.info-card strong {
+    display: block;
+    margin-bottom: 4px;
+
+    font-size: 15px;
+}
+
+.info-card p {
+    margin-bottom: 0;
+
+    color: rgba(35, 66, 54, 0.68);
+
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.return-button {
+    width: 100%;
+    margin-top: 22px;
+
+    display: flex;
+    gap: 14px;
+    align-items: center;
+
+    padding: 17px;
+
+    border: 3px solid var(--mir-green);
+    border-radius: 20px;
+
+    background: var(--mir-blue);
+    color: var(--white);
+
+    text-align: left;
+    cursor: pointer;
+
+    box-shadow: 4px 4px 0 var(--mir-green);
+}
+
+.return-icon {
+    width: 40px;
+    height: 40px;
+
+    flex: 0 0 40px;
 
     display: grid;
     place-items: center;
@@ -248,25 +258,33 @@ h2 {
     border-radius: 12px;
 
     background: var(--mir-lime);
+    color: var(--mir-green);
 
     font-size: 18px;
     font-weight: 900;
 }
 
-.note-card strong {
-    display: block;
-    margin-bottom: 5px;
-
-    font-size: 15px;
+.return-copy {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
 }
 
-.note-card p {
-    margin-bottom: 0;
+.return-copy strong {
+    font-size: 16px;
+}
 
-    color: rgba(35, 66, 54, 0.68);
+.return-copy small {
+    color: rgba(255, 255, 255, 0.78);
 
-    font-size: 13px;
-    line-height: 1.35;
+    font-size: 12px;
+    line-height: 1.25;
+}
+
+.return-arrow {
+    font-size: 22px;
+    line-height: 1;
 }
 
 .telegram-status {
@@ -290,11 +308,7 @@ h2 {
         padding: 20px;
     }
 
-    .rules-grid {
-        gap: 7px;
-    }
-
-    .rule-card {
-        padding: 12px 10px;
+    .info-card {
+        padding: 14px;
     }
 }
