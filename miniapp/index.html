@@ -40,32 +40,43 @@
                 <p class="eyebrow">КАК ЭТО РАБОТАЕТ</p>
             </div>
 
-            <div class="rules-grid">
-                <article class="rule-card rule-pink">
-                    <strong>1</strong>
-                    <span>книга за раз</span>
+            <div class="rules-list">
+                <article class="info-card">
+                    <span class="info-number">1</span>
+                    <div>
+                        <strong>Одна книга за раз</strong>
+                        <p>Сначала верни текущую книгу, потом бери следующую.</p>
+                    </div>
                 </article>
 
-                <article class="rule-card rule-lime">
-                    <strong>30</strong>
-                    <span>дней на чтение</span>
+                <article class="info-card">
+                    <span class="info-number">30</span>
+                    <div>
+                        <strong>30 дней на чтение</strong>
+                        <p>Срок считается с момента выдачи книги.</p>
+                    </div>
                 </article>
 
-                <article class="rule-card rule-blue">
-                    <strong>+30</strong>
-                    <span>дней продления</span>
+                <article class="info-card">
+                    <span class="info-number">+30</span>
+                    <div>
+                        <strong>Одно продление</strong>
+                        <p>Можно один раз добавить ещё 30 дней.</p>
+                    </div>
                 </article>
             </div>
         </section>
 
-        <section class="note-card">
-            <span class="note-icon" aria-hidden="true">↗</span>
+        <button class="return-button" id="return-button" type="button">
+            <span class="return-icon" aria-hidden="true">↗</span>
 
-            <div>
-                <strong>Возвращай на полку</strong>
-                <p>Возврат подтверждает библиотекарь по фотографии книги на полке.</p>
-            </div>
-        </section>
+            <span class="return-copy">
+                <strong>Вернуть книгу</strong>
+                <small>Отправить фото книги на полке</small>
+            </span>
+
+            <span class="return-arrow" aria-hidden="true">→</span>
+        </button>
 
         <p class="telegram-status" id="telegram-status"></p>
     </main>
