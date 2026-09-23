@@ -1,33 +1,75 @@
 <!DOCTYPE html>
-
 <html lang="ru">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     <title>Книги Мира</title>
 
     <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 
 <body>
-
-<body>
-
     <main class="app">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">БИБЛИОТЕКА В МИРЕ</p>
+                <h1>Книги Мира</h1>
+            </div>
 
-        <h1>Книги Мира</h1>
+            <div class="avatar" id="avatar" aria-hidden="true">К</div>
+        </header>
 
-        <p>Библиотечная полка в кофейне</p>
+        <section class="welcome-card">
+            <div class="welcome-copy">
+                <p class="greeting" id="greeting">Привет!</p>
+                <p class="username" id="username">Рада видеть тебя в библиотеке.</p>
 
-        <button>Смотреть книги</button>
+                <h2>Какую историю<br>возьмём сегодня?</h2>
+            </div>
 
+            <button class="primary-button" id="catalog-button" type="button">
+                Смотреть книги
+                <span aria-hidden="true">→</span>
+            </button>
+        </section>
+
+        <section class="rules" aria-label="Правила библиотеки">
+            <div class="section-heading">
+                <p class="eyebrow">КАК ЭТО РАБОТАЕТ</p>
+            </div>
+
+            <div class="rules-grid">
+                <article class="rule-card rule-pink">
+                    <strong>1</strong>
+                    <span>книга за раз</span>
+                </article>
+
+                <article class="rule-card rule-lime">
+                    <strong>30</strong>
+                    <span>дней на чтение</span>
+                </article>
+
+                <article class="rule-card rule-blue">
+                    <strong>+30</strong>
+                    <span>дней продления</span>
+                </article>
+            </div>
+        </section>
+
+        <section class="note-card">
+            <span class="note-icon" aria-hidden="true">↗</span>
+
+            <div>
+                <strong>Возвращай на полку</strong>
+                <p>Возврат подтверждает библиотекарь по фотографии книги на полке.</p>
+            </div>
+        </section>
+
+        <p class="telegram-status" id="telegram-status"></p>
     </main>
 
     <script src="app.js"></script>
 </body>
-
-</body>
-
 </html>
