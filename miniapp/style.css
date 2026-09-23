@@ -315,20 +315,6 @@ h2 {
     line-height: 1.4;
 }
 
-.back-link {
-    margin: 0 0 26px;
-    padding: 0;
-
-    border: 0;
-    background: transparent;
-    color: var(--mir-green);
-
-    font-size: 14px;
-    font-weight: 800;
-
-    cursor: pointer;
-}
-
 .catalog-message {
     padding: 28px 0;
 
@@ -446,10 +432,6 @@ h2 {
 .status-badge.is-unavailable {
     background: var(--white);
     color: var(--muted);
-}
-
-.detail-back {
-    margin-bottom: 18px;
 }
 
 .book-detail {
