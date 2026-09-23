@@ -172,55 +172,37 @@ h2 {
     margin-bottom: 12px;
 }
 
-.rules-list {
-    display: flex;
-    flex-direction: column;
+.rules-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
 }
 
-.info-card {
+.rule-card {
+    min-height: 108px;
+
     display: flex;
-    gap: 14px;
-    align-items: flex-start;
+    flex-direction: column;
+    justify-content: space-between;
 
-    padding: 16px;
+    padding: 14px 12px;
 
-    border: 3px solid var(--mir-green);
-    border-radius: 20px;
+    border: 0;
+    border-radius: 18px;
 
     background: var(--white);
-}
-
-.info-number {
-    min-width: 46px;
-    height: 38px;
-
-    display: grid;
-    place-items: center;
-
-    border-radius: 12px;
-
-    background: var(--mir-cream);
     color: var(--mir-green);
-
-    font-size: 18px;
-    font-weight: 900;
 }
 
-.info-card strong {
-    display: block;
-    margin-bottom: 4px;
-
-    font-size: 15px;
+.rule-card strong {
+    font-size: 30px;
+    line-height: 1;
 }
 
-.info-card p {
-    margin-bottom: 0;
-
-    color: rgba(35, 66, 54, 0.68);
-
-    font-size: 13px;
-    line-height: 1.35;
+.rule-card span {
+    font-size: 12px;
+    line-height: 1.15;
+    font-weight: 800;
 }
 
 .return-button {
@@ -308,7 +290,11 @@ h2 {
         padding: 20px;
     }
 
-    .info-card {
-        padding: 14px;
+    .rules-grid {
+        gap: 7px;
+    }
+
+    .rule-card {
+        padding: 12px 10px;
     }
 }
