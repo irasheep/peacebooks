@@ -346,7 +346,11 @@ h2 {
 
 .book-card {
     min-width: 0;
+    height: 100%;
     padding: 0;
+
+    display: flex;
+    flex-direction: column;
 
     border: 0;
     background: transparent;
@@ -389,6 +393,11 @@ h2 {
 }
 
 .book-card-copy {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+
     padding: 12px 2px 0;
 }
 
@@ -408,6 +417,11 @@ h2 {
 
     font-size: 12px;
     line-height: 1.25;
+}
+
+.book-card .status-badge {
+    align-self: flex-start;
+    margin-top: auto;
 }
 
 .status-badge {
