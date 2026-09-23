@@ -70,6 +70,19 @@ async function fetchAllBooks(token) {
     return results.map(normalizeBook);
 }
 
+function isCompleteBook(book) {
+    return Boolean(
+        book.title &&
+        book.author &&
+        book.annotation &&
+        book.isbn &&
+        book.cover &&
+        book.status &&
+        book.status !== "Не указан" &&
+        book.createdAt
+    );
+}
+
 function sortCatalog(books) {
     return books.sort((a, b) => {
         const aAvailable = a.status === "На полке" ? 0 : 1;
@@ -96,10 +109,12 @@ module.exports = async function handler(req, res) {
     }
 
     try {
-        const books = sortCatalog(await fetchAllBooks(token));
+        const allBooks = await fetchAllBooks(token);
+        const books = sortCatalog(allBooks.filter(isCompleteBook));
+        const skippedIncomplete = allBooks.length - books.length;
 
         res.setHeader("Cache-Control", "s-maxage=30, stale-while-revalidate=60");
-        return res.status(200).json({ books });
+        return res.status(200).json({ books, skippedIncomplete });
     } catch (error) {
         console.error("Failed to load catalog from Notion", error);
         return res.status(502).json({ error: "Не удалось загрузить каталог" });
