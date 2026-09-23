@@ -174,35 +174,46 @@ h2 {
 
 .rules-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
 }
 
 .rule-card {
-    min-height: 108px;
+    aspect-ratio: 1 / 1;
 
     display: flex;
     flex-direction: column;
+    align-items: center;
     justify-content: space-between;
 
-    padding: 14px 12px;
+    min-width: 0;
+    padding: 18px 10px 16px;
 
     border: 0;
     border-radius: 18px;
 
     background: var(--white);
     color: var(--mir-green);
+
+    text-align: center;
 }
 
 .rule-card strong {
-    font-size: 30px;
+    font-size: 34px;
     line-height: 1;
 }
 
 .rule-card span {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+
+    min-height: 2.3em;
+
     font-size: 12px;
     line-height: 1.15;
     font-weight: 800;
+    text-align: center;
 }
 
 .return-button {
@@ -295,6 +306,6 @@ h2 {
     }
 
     .rule-card {
-        padding: 12px 10px;
+        padding: 16px 8px 14px;
     }
 }
