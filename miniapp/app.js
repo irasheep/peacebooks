@@ -11,8 +11,6 @@ const usernameElement = document.getElementById("username");
 const avatarElement = document.getElementById("avatar");
 
 const catalogButton = document.getElementById("catalog-button");
-const catalogHomeButton = document.getElementById("catalog-home-button");
-const bookBackButton = document.getElementById("book-back-button");
 const returnButton = document.getElementById("return-button");
 const borrowButton = document.getElementById("borrow-button");
 
@@ -202,16 +200,6 @@ if (tg) {
 }
 
 catalogButton.addEventListener("click", () => {
-    tapFeedback();
-    showCatalog();
-});
-
-catalogHomeButton.addEventListener("click", () => {
-    tapFeedback();
-    setScreen("home");
-});
-
-bookBackButton.addEventListener("click", () => {
     tapFeedback();
     showCatalog();
 });
