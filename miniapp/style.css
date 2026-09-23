@@ -280,17 +280,6 @@ h2 {
     line-height: 1;
 }
 
-.telegram-status {
-    min-height: 16px;
-
-    margin: 18px 4px 0;
-
-    color: rgba(35, 66, 54, 0.45);
-
-    font-size: 11px;
-    text-align: center;
-}
-
 @media (max-width: 360px) {
     .app {
         padding-left: 16px;
