@@ -3,7 +3,6 @@ const tg = window.Telegram?.WebApp;
 const greetingElement = document.getElementById("greeting");
 const usernameElement = document.getElementById("username");
 const avatarElement = document.getElementById("avatar");
-const statusElement = document.getElementById("telegram-status");
 const catalogButton = document.getElementById("catalog-button");
 const returnButton = document.getElementById("return-button");
 
@@ -30,12 +29,7 @@ if (tg) {
             usernameElement.textContent = "Рада видеть тебя в библиотеке.";
         }
 
-        statusElement.textContent = "Открыто через Telegram";
-    } else {
-        statusElement.textContent = "Telegram не передал данные пользователя";
     }
-} else {
-    statusElement.textContent = "Режим браузера — данные Telegram недоступны";
 }
 
 catalogButton.addEventListener("click", () => {
