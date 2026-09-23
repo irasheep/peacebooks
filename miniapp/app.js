@@ -4,7 +4,8 @@ const greetingElement = document.getElementById("greeting");
 const usernameElement = document.getElementById("username");
 const avatarElement = document.getElementById("avatar");
 const statusElement = document.getElementById("telegram-status");
-const catalogButton = document.getElementById("catalog-button");\nconst returnButton = document.getElementById("return-button");
+const catalogButton = document.getElementById("catalog-button");
+const returnButton = document.getElementById("return-button");
 
 function getInitial(name) {
     if (!name) return "К";
@@ -42,14 +43,12 @@ catalogButton.addEventListener("click", () => {
         tg.HapticFeedback.impactOccurred("light");
     }
 
-    // Каталог добавим следующим шагом.
     if (tg?.showAlert) {
         tg.showAlert("Каталог будет следующим экраном 📚");
     } else {
         alert("Каталог будет следующим экраном 📚");
     }
 });
-
 
 returnButton.addEventListener("click", () => {
     if (tg?.HapticFeedback) {
