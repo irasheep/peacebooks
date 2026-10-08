@@ -212,6 +212,88 @@ function showMessage(message) {
     }
 }
 
+function formatDueDate(isoDate) {
+    return new Intl.DateTimeFormat("ru-RU", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+    }).format(new Date(isoDate));
+}
+
+async function borrowBook(qrText) {
+    const book = books.find((item) => item.id === selectedBookId);
+
+    if (!book) {
+        showMessage("Не удалось найти выбранную книгу.");
+        return;
+    }
+
+    if (!tg?.initData) {
+        showMessage("Выдача работает только внутри Telegram.");
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/borrow", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                initData: tg.initData,
+                qrText,
+                bookId: selectedBookId,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            if (data.code === "WRONG_QR") {
+                showMessage("Это не QR «Книг Мира» в кофейне МИР.");
+                return;
+            }
+
+            if (data.code === "ACTIVE_LOAN") {
+                showMessage("У тебя уже есть активная книга. Сначала верни её.");
+                return;
+            }
+
+            if (data.code === "BOOK_UNAVAILABLE") {
+                showMessage("Эту книгу уже взяли. Обнови каталог и выбери другую.");
+                catalogLoaded = false;
+                return;
+            }
+
+            if (data.code === "AUTH_FAILED") {
+                showMessage("Не удалось подтвердить Telegram-профиль. Закрой и заново открой Mini App.");
+                return;
+            }
+
+            if (data.code === "CONFIG_ERROR") {
+                showMessage("Выдача книг ещё не до конца настроена на сервере.");
+                return;
+            }
+
+            throw new Error(data.error || `Borrow failed: ${response.status}`);
+        }
+
+        tg?.HapticFeedback?.notificationOccurred("success");
+
+        book.status = "На руках";
+        catalogLoaded = false;
+        showBook(book.id);
+
+        showMessage(
+            `Готово! «${book.title}» теперь у тебя до ${formatDueDate(data.dueAt)}.`
+        );
+    } catch (error) {
+        console.error(error);
+        tg?.HapticFeedback?.notificationOccurred("error");
+        showMessage("Не удалось оформить выдачу. Попробуй ещё раз.");
+    }
+}
+
 async function validateMirQr(qrText, action) {
     try {
         const response = await fetch("/api/validate-qr", {
@@ -268,7 +350,12 @@ function startQrGate(action) {
         : "Отсканируй QR «Книг Мира» у книжной полки";
 
     tg.showScanQrPopup({ text }, (qrText) => {
-        validateMirQr(qrText, action);
+        if (action === "borrow") {
+            borrowBook(qrText);
+        } else {
+            validateMirQr(qrText, action);
+        }
+
         return true;
     });
 }
