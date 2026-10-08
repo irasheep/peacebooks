@@ -4,6 +4,7 @@ const screens = {
     home: document.getElementById("home-screen"),
     catalog: document.getElementById("catalog-screen"),
     book: document.getElementById("book-screen"),
+    return: document.getElementById("return-screen"),
 };
 
 const greetingElement = document.getElementById("greeting");
@@ -24,10 +25,19 @@ const bookAuthor = document.getElementById("book-author");
 const bookAnnotation = document.getElementById("book-annotation");
 const unavailableNote = document.getElementById("unavailable-note");
 
+const returnBookTitle = document.getElementById("return-book-title");
+const returnPhotoContent = document.getElementById("return-photo-content");
+const returnStateMessage = document.getElementById("return-state-message");
+const returnPhotoInput = document.getElementById("return-photo-input");
+const returnPreview = document.getElementById("return-preview");
+const returnPreviewImage = document.getElementById("return-preview-image");
+const submitReturnButton = document.getElementById("submit-return-button");
+
 let books = [];
 let catalogLoaded = false;
 let currentScreen = "home";
 let selectedBookId = null;
+let returnPhotoData = null;
 
 function getInitial(name) {
     if (!name) return "К";
@@ -70,7 +80,7 @@ function handleTelegramBack() {
         return;
     }
 
-    if (currentScreen === "catalog") {
+    if (currentScreen === "catalog" || currentScreen === "return") {
         setScreen("home");
     }
 }
@@ -308,50 +318,7 @@ async function borrowBook(qrText) {
     }
 }
 
-async function validateMirQr(qrText, action) {
-    try {
-        const response = await fetch("/api/validate-qr", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                qrText,
-                action,
-                bookId: action === "borrow" ? selectedBookId : null,
-            }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || `QR validation failed: ${response.status}`);
-        }
-
-        if (!data.valid) {
-            tg?.HapticFeedback?.notificationOccurred("error");
-            showMessage("Это не QR «Книг Мира» в кофейне МИР.");
-            return;
-        }
-
-        tg?.HapticFeedback?.notificationOccurred("success");
-
-        if (action === "borrow") {
-            const book = books.find((item) => item.id === selectedBookId);
-            const title = book?.title ? `«${book.title}»` : "Книга";
-            showMessage(`${title}: QR подтверждён. Следующим шагом подключим настоящую выдачу на 30 дней.`);
-            return;
-        }
-
-        showMessage("QR подтверждён. Следующим шагом откроем отправку фото книги на полке.");
-    } catch (error) {
-        console.error(error);
-        tg?.HapticFeedback?.notificationOccurred("error");
-        showMessage("Не удалось проверить QR. Попробуй ещё раз.");
-    }
-}
-
-function startQrGate(action) {
+function startBorrowQrGate() {
     tapFeedback();
 
     if (!tg?.showScanQrPopup) {
@@ -359,25 +326,258 @@ function startQrGate(action) {
         return;
     }
 
-    const text = action === "borrow"
-        ? "Отсканируй QR «Книг Мира» на стене кофейни"
-        : "Отсканируй QR «Книг Мира» у книжной полки";
-
-    tg.showScanQrPopup({ text }, (qrText) => {
-        if (action === "borrow") {
+    tg.showScanQrPopup(
+        { text: "Отсканируй QR «Книг Мира» на стене кофейни" },
+        (qrText) => {
             borrowBook(qrText);
-        } else {
-            validateMirQr(qrText, action);
+            return true;
+        }
+    );
+}
+
+function resetReturnScreen() {
+    returnPhotoData = null;
+    returnBookTitle.textContent = "Проверяю твою текущую книгу…";
+    returnPhotoContent.hidden = true;
+    returnStateMessage.hidden = false;
+    returnStateMessage.textContent = "Загружаю данные…";
+    returnPhotoInput.value = "";
+    returnPreview.hidden = true;
+    returnPreviewImage.removeAttribute("src");
+    submitReturnButton.hidden = true;
+    submitReturnButton.disabled = false;
+    submitReturnButton.innerHTML = 'Отправить возврат <span aria-hidden="true">→</span>';
+}
+
+async function showReturnScreen() {
+    tapFeedback();
+    resetReturnScreen();
+    setScreen("return");
+
+    if (!tg?.initData) {
+        returnStateMessage.textContent = "Возврат работает только внутри Telegram.";
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/my-loan", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ initData: tg.initData }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            if (data.code === "AUTH_FAILED") {
+                returnStateMessage.textContent =
+                    "Не удалось подтвердить Telegram-профиль. Закрой и заново открой Mini App.";
+                return;
+            }
+
+            throw new Error(data.error || `Current loan failed: ${response.status}`);
         }
 
-        return true;
+        if (!data.loan) {
+            returnBookTitle.textContent = "Сейчас у тебя нет активной книги.";
+            returnStateMessage.textContent =
+                "Когда возьмёшь книгу, здесь можно будет отправить её возврат.";
+            return;
+        }
+
+        returnBookTitle.textContent = `Возвращаешь «${data.loan.bookTitle}»`;
+
+        if (data.loan.status === "return_pending") {
+            returnStateMessage.textContent =
+                "Возврат уже отправлен на проверку. До подтверждения книга остаётся у тебя в системе.";
+            return;
+        }
+
+        returnPhotoContent.hidden = false;
+        returnStateMessage.hidden = true;
+    } catch (error) {
+        console.error(error);
+        returnStateMessage.textContent =
+            "Не удалось загрузить данные о книге. Попробуй ещё раз.";
+    }
+}
+
+function loadImage(file) {
+    return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const image = new Image();
+
+        image.onload = () => {
+            URL.revokeObjectURL(url);
+            resolve(image);
+        };
+
+        image.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error("Не удалось открыть изображение"));
+        };
+
+        image.src = url;
     });
 }
 
-borrowButton.addEventListener("click", () => {
-    startQrGate("borrow");
+function canvasToBlob(canvas, quality) {
+    return new Promise((resolve) => {
+        canvas.toBlob(resolve, "image/jpeg", quality);
+    });
+}
+
+function blobToDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(blob);
+    });
+}
+
+async function prepareReturnPhoto(file) {
+    if (!file?.type?.startsWith("image/")) {
+        throw new Error("Выбери фотографию.");
+    }
+
+    const image = await loadImage(file);
+    const maxDimension = 1600;
+    const originalWidth = image.naturalWidth || image.width;
+    const originalHeight = image.naturalHeight || image.height;
+    const scale = Math.min(1, maxDimension / Math.max(originalWidth, originalHeight));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(originalWidth * scale));
+    canvas.height = Math.max(1, Math.round(originalHeight * scale));
+
+    const context = canvas.getContext("2d");
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    let blob = null;
+
+    for (const quality of [0.82, 0.7, 0.58]) {
+        blob = await canvasToBlob(canvas, quality);
+        if (blob && blob.size <= 1.8 * 1024 * 1024) break;
+    }
+
+    if (!blob) {
+        throw new Error("Не удалось подготовить фотографию.");
+    }
+
+    if (blob.size > 2.5 * 1024 * 1024) {
+        throw new Error("Фото получилось слишком большим. Попробуй сделать снимок ещё раз.");
+    }
+
+    return blobToDataUrl(blob);
+}
+
+returnPhotoInput.addEventListener("change", async () => {
+    const file = returnPhotoInput.files?.[0];
+    if (!file) return;
+
+    submitReturnButton.hidden = true;
+
+    try {
+        returnPhotoData = await prepareReturnPhoto(file);
+        returnPreviewImage.src = returnPhotoData;
+        returnPreview.hidden = false;
+        submitReturnButton.hidden = false;
+        tg?.HapticFeedback?.notificationOccurred("success");
+    } catch (error) {
+        console.error(error);
+        returnPhotoData = null;
+        returnPreview.hidden = true;
+        returnPhotoInput.value = "";
+        showMessage(error.message || "Не удалось подготовить фото.");
+    }
 });
 
-returnButton.addEventListener("click", () => {
-    startQrGate("return");
-});
+async function submitReturnRequest() {
+    if (!returnPhotoData) {
+        showMessage("Сначала сделай фото книги на полке.");
+        return;
+    }
+
+    if (!tg?.initData) {
+        showMessage("Возврат работает только внутри Telegram.");
+        return;
+    }
+
+    submitReturnButton.disabled = true;
+    submitReturnButton.textContent = "Отправляю фото…";
+
+    try {
+        const response = await fetch("/api/return-request", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                initData: tg.initData,
+                photoData: returnPhotoData,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            if (data.code === "NO_ACTIVE_LOAN") {
+                showMessage("У тебя нет активной книги для возврата.");
+                return;
+            }
+
+            if (data.code === "ALREADY_PENDING") {
+                showMessage("Этот возврат уже отправлен на проверку.");
+                return;
+            }
+
+            if (data.code === "BAD_PHOTO") {
+                showMessage("Не удалось обработать фото. Попробуй сделать его ещё раз.");
+                return;
+            }
+
+            if (data.code === "AUTH_FAILED") {
+                showMessage("Не удалось подтвердить Telegram-профиль. Закрой и заново открой Mini App.");
+                return;
+            }
+
+            if (data.code === "NOTION_ERROR") {
+                const stageNames = {
+                    find_loan: "проверка текущей книги",
+                    upload_photo: "загрузка фото",
+                    mark_pending: "сохранение возврата",
+                };
+                const stage = stageNames[data.stage] || data.stage || "Notion";
+                const status = data.notionStatus ? ` · Notion ${data.notionStatus}` : "";
+                showMessage(`Не удалось отправить возврат. Шаг: ${stage}${status}.`);
+                return;
+            }
+
+            throw new Error(data.error || `Return request failed: ${response.status}`);
+        }
+
+        tg?.HapticFeedback?.notificationOccurred("success");
+
+        returnPhotoData = null;
+        returnPhotoContent.hidden = true;
+        returnStateMessage.hidden = false;
+        returnStateMessage.textContent =
+            "Возврат отправлен на проверку. Пока библиотекарь его не подтвердит, книга остаётся «На руках» и новую взять нельзя.";
+
+        showMessage("Фото отправлено. Возврат ждёт подтверждения библиотекаря.");
+    } catch (error) {
+        console.error(error);
+        tg?.HapticFeedback?.notificationOccurred("error");
+        showMessage("Не удалось отправить возврат. Попробуй ещё раз.");
+    } finally {
+        submitReturnButton.disabled = false;
+        submitReturnButton.innerHTML = 'Отправить возврат <span aria-hidden="true">→</span>';
+    }
+}
+
+borrowButton.addEventListener("click", startBorrowQrGate);
+returnButton.addEventListener("click", showReturnScreen);
+submitReturnButton.addEventListener("click", submitReturnRequest);
