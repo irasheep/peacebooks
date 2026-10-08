@@ -529,6 +529,108 @@ h2 {
     text-align: center;
 }
 
+.return-photo-card {
+    padding: 22px;
+
+    border: 1.5px solid var(--soft-line);
+    border-radius: 24px;
+
+    background: var(--white);
+}
+
+.return-photo-title {
+    margin-bottom: 12px;
+
+    font-size: 30px;
+    line-height: 1;
+    letter-spacing: -1.2px;
+}
+
+.return-instruction {
+    margin-bottom: 22px;
+
+    color: var(--muted);
+
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.photo-button {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    padding: 16px 18px;
+
+    border: 3px solid var(--mir-green);
+    border-radius: 17px;
+
+    background: var(--mir-lime);
+    color: var(--mir-green);
+
+    font-size: 16px;
+    font-weight: 900;
+
+    cursor: pointer;
+    box-shadow: 4px 4px 0 var(--mir-green);
+}
+
+.photo-button span {
+    font-size: 20px;
+    line-height: 1;
+}
+
+.photo-button:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--mir-green);
+}
+
+.photo-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+}
+
+.return-preview {
+    margin-top: 20px;
+
+    overflow: hidden;
+
+    border: 1.5px solid var(--soft-line);
+    border-radius: 18px;
+
+    background: var(--mir-cream);
+}
+
+.return-preview img {
+    width: 100%;
+    max-height: 420px;
+
+    display: block;
+
+    object-fit: cover;
+}
+
+.submit-return-button {
+    margin-top: 20px;
+}
+
+.return-state-message {
+    margin-bottom: 0;
+
+    color: var(--muted);
+
+    font-size: 14px;
+    line-height: 1.45;
+}
+
 [hidden] {
     display: none !important;
 }
