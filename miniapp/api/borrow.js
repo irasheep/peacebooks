@@ -325,8 +325,10 @@ module.exports = async function handler(req, res) {
     }
 
     const telegramId = String(auth.user.id);
+    let stage = "start";
 
     try {
+        stage = "check_active_loan";
         const activeLoan = await findActiveLoan(notionToken, telegramId);
 
         if (activeLoan) {
@@ -336,6 +338,7 @@ module.exports = async function handler(req, res) {
             });
         }
 
+        stage = "get_book";
         const book = await getBook(notionToken, bookId);
         const bookStatus = book.properties?.Status?.status?.name;
 
@@ -346,14 +349,17 @@ module.exports = async function handler(req, res) {
             });
         }
 
+        stage = "ensure_user";
         await ensureUser(notionToken, auth.user);
 
         const borrowedAt = new Date();
         const dueAt = new Date(borrowedAt.getTime() + 30 * 24 * 60 * 60 * 1000);
 
+        stage = "set_book_status";
         await setBookStatus(notionToken, bookId, "На руках");
 
         try {
+            stage = "create_loan";
             const loan = await createLoan(
                 notionToken,
                 auth.user,
@@ -383,6 +389,8 @@ module.exports = async function handler(req, res) {
         return res.status(502).json({
             code: "NOTION_ERROR",
             error: "Не удалось оформить выдачу",
+            stage,
+            notionStatus: error?.status || null,
         });
     }
 };
