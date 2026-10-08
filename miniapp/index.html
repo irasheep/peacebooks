@@ -82,6 +82,49 @@
             <div class="catalog-grid" id="catalog-grid" aria-live="polite"></div>
         </section>
 
+        <section class="screen" id="return-screen" aria-labelledby="return-title">
+            <header class="screen-header">
+                <p class="eyebrow">ВОЗВРАТ</p>
+                <h1 id="return-title">Вернуть книгу</h1>
+                <p class="screen-subtitle" id="return-book-title">Проверяю твою текущую книгу…</p>
+            </header>
+
+            <section class="return-photo-card">
+                <div id="return-photo-content" hidden>
+                    <h2 class="return-photo-title">Поставь книгу на полку</h2>
+                    <p class="return-instruction">
+                        Сфотографируй книгу так, чтобы было видно её на полке «Книг Мира».
+                        После отправки возврат уйдёт библиотекарю на проверку.
+                    </p>
+
+                    <label class="photo-button" for="return-photo-input">
+                        <span aria-hidden="true">＋</span>
+                        Сделать фото
+                    </label>
+                    <input
+                        class="photo-input"
+                        id="return-photo-input"
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                    >
+
+                    <div class="return-preview" id="return-preview" hidden>
+                        <img id="return-preview-image" alt="Фото книги на полке">
+                    </div>
+
+                    <button class="primary-button submit-return-button" id="submit-return-button" type="button" hidden>
+                        Отправить возврат
+                        <span aria-hidden="true">→</span>
+                    </button>
+                </div>
+
+                <p class="return-state-message" id="return-state-message">
+                    Загружаю данные…
+                </p>
+            </section>
+        </section>
+
         <section class="screen" id="book-screen" aria-labelledby="book-title">
             <article class="book-detail">
                 <div class="detail-cover-wrap">
