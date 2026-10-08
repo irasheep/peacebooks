@@ -275,6 +275,20 @@ async function borrowBook(qrText) {
                 return;
             }
 
+            if (data.code === "NOTION_ERROR") {
+                const stageNames = {
+                    check_active_loan: "проверка Loans",
+                    get_book: "чтение книги",
+                    ensure_user: "создание пользователя",
+                    set_book_status: "смена статуса книги",
+                    create_loan: "создание займа",
+                };
+                const stage = stageNames[data.stage] || data.stage || "Notion";
+                const status = data.notionStatus ? ` · Notion ${data.notionStatus}` : "";
+                showMessage(`Не удалось оформить выдачу. Шаг: ${stage}${status}.`);
+                return;
+            }
+
             throw new Error(data.error || `Borrow failed: ${response.status}`);
         }
 
