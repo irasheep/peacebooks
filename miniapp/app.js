@@ -204,29 +204,79 @@ catalogButton.addEventListener("click", () => {
     showCatalog();
 });
 
-borrowButton.addEventListener("click", () => {
-    tapFeedback();
-
-    const book = books.find((item) => item.id === selectedBookId);
-    const message = book
-        ? `«${book.title}» можно взять. Саму выдачу подключим следующим этапом.`
-        : "Саму выдачу подключим следующим этапом.";
-
+function showMessage(message) {
     if (tg?.showAlert) {
         tg.showAlert(message);
     } else {
         alert(message);
     }
+}
+
+async function validateMirQr(qrText, action) {
+    try {
+        const response = await fetch("/api/validate-qr", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                qrText,
+                action,
+                bookId: action === "borrow" ? selectedBookId : null,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || `QR validation failed: ${response.status}`);
+        }
+
+        if (!data.valid) {
+            tg?.HapticFeedback?.notificationOccurred("error");
+            showMessage("Это не QR «Книг Мира» в кофейне МИР.");
+            return;
+        }
+
+        tg?.HapticFeedback?.notificationOccurred("success");
+
+        if (action === "borrow") {
+            const book = books.find((item) => item.id === selectedBookId);
+            const title = book?.title ? `«${book.title}»` : "Книга";
+            showMessage(`${title}: QR подтверждён. Следующим шагом подключим настоящую выдачу на 30 дней.`);
+            return;
+        }
+
+        showMessage("QR подтверждён. Следующим шагом откроем отправку фото книги на полке.");
+    } catch (error) {
+        console.error(error);
+        tg?.HapticFeedback?.notificationOccurred("error");
+        showMessage("Не удалось проверить QR. Попробуй ещё раз.");
+    }
+}
+
+function startQrGate(action) {
+    tapFeedback();
+
+    if (!tg?.showScanQrPopup) {
+        showMessage("Сканирование QR доступно внутри актуальной версии Telegram.");
+        return;
+    }
+
+    const text = action === "borrow"
+        ? "Отсканируй QR «Книг Мира» на стене кофейни"
+        : "Отсканируй QR «Книг Мира» у книжной полки";
+
+    tg.showScanQrPopup({ text }, (qrText) => {
+        validateMirQr(qrText, action);
+        return true;
+    });
+}
+
+borrowButton.addEventListener("click", () => {
+    startQrGate("borrow");
 });
 
 returnButton.addEventListener("click", () => {
-    tapFeedback();
-
-    const message = "Возврат с фотографией подключим следующим этапом.";
-
-    if (tg?.showAlert) {
-        tg.showAlert(message);
-    } else {
-        alert(message);
-    }
+    startQrGate("return");
 });
