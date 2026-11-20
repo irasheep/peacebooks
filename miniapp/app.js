@@ -5,6 +5,7 @@ const screens = {
     catalog: document.getElementById("catalog-screen"),
     book: document.getElementById("book-screen"),
     return: document.getElementById("return-screen"),
+    admin: document.getElementById("admin-screen"),
 };
 
 const greetingElement = document.getElementById("greeting");
@@ -13,6 +14,7 @@ const avatarElement = document.getElementById("avatar");
 
 const catalogButton = document.getElementById("catalog-button");
 const returnButton = document.getElementById("return-button");
+const adminButton = document.getElementById("admin-button");
 const borrowButton = document.getElementById("borrow-button");
 
 const catalogGrid = document.getElementById("catalog-grid");
@@ -32,6 +34,9 @@ const returnPhotoInput = document.getElementById("return-photo-input");
 const returnPreview = document.getElementById("return-preview");
 const returnPreviewImage = document.getElementById("return-preview-image");
 const submitReturnButton = document.getElementById("submit-return-button");
+
+const adminMessage = document.getElementById("admin-message");
+const adminList = document.getElementById("admin-list");
 
 let books = [];
 let catalogLoaded = false;
@@ -80,7 +85,11 @@ function handleTelegramBack() {
         return;
     }
 
-    if (currentScreen === "catalog" || currentScreen === "return") {
+    if (
+        currentScreen === "catalog" ||
+        currentScreen === "return" ||
+        currentScreen === "admin"
+    ) {
         setScreen("home");
     }
 }
@@ -207,6 +216,7 @@ if (tg) {
     }
 
     tg.BackButton?.onClick(handleTelegramBack);
+    loadCurrentRole();
 }
 
 catalogButton.addEventListener("click", () => {
@@ -578,6 +588,233 @@ async function submitReturnRequest() {
     }
 }
 
+async function loadCurrentRole() {
+    adminButton.hidden = true;
+
+    if (!tg?.initData) return;
+
+    try {
+        const response = await fetch("/api/me", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ initData: tg.initData }),
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        adminButton.hidden = !data.isAdmin;
+    } catch (error) {
+        console.error("Failed to load role", error);
+    }
+}
+
+function formatAdminDate(isoDate) {
+    if (!isoDate) return "Время не указано";
+
+    return new Intl.DateTimeFormat("ru-RU", {
+        day: "numeric",
+        month: "long",
+        hour: "2-digit",
+        minute: "2-digit",
+    }).format(new Date(isoDate));
+}
+
+function renderAdminReturns(items) {
+    adminList.innerHTML = "";
+
+    if (!items.length) {
+        adminMessage.hidden = false;
+        adminMessage.textContent = "Возвратов на проверку сейчас нет.";
+        return;
+    }
+
+    adminMessage.hidden = true;
+
+    adminList.innerHTML = items
+        .map((item) => {
+            const title = escapeHtml(item.bookTitle || "Книга");
+            const userName = escapeHtml(item.userName || "Неизвестный читатель");
+            const time = escapeHtml(formatAdminDate(item.requestedAt));
+            const loanId = escapeHtml(item.id || "");
+            const photo = escapeHtml(item.photoUrl || "");
+
+            const photoMarkup = photo
+                ? `<img class="admin-photo" src="${photo}" alt="Фото возврата книги «${title}»">`
+                : `<div class="admin-photo-placeholder">Фото не удалось загрузить</div>`;
+
+            return `
+                <article class="admin-return-card" data-loan-id="${loanId}">
+                    <div class="admin-photo-wrap">
+                        ${photoMarkup}
+                    </div>
+                    <div class="admin-return-content">
+                        <h2>${title}</h2>
+                        <p class="admin-return-user">${userName}</p>
+                        <p class="admin-return-time">Отправлено: ${time}</p>
+
+                        <div class="admin-actions">
+                            <button
+                                class="admin-action reject"
+                                type="button"
+                                data-admin-action="reject"
+                                data-loan-id="${loanId}"
+                            >
+                                Отклонить
+                            </button>
+                            <button
+                                class="admin-action approve"
+                                type="button"
+                                data-admin-action="approve"
+                                data-loan-id="${loanId}"
+                            >
+                                Подтвердить
+                            </button>
+                        </div>
+                    </div>
+                </article>
+            `;
+        })
+        .join("");
+
+    adminList.querySelectorAll("[data-admin-action]").forEach((button) => {
+        button.addEventListener("click", () => {
+            handleAdminReturnAction(
+                button.dataset.loanId,
+                button.dataset.adminAction
+            );
+        });
+    });
+}
+
+async function loadAdminReturns() {
+    adminList.innerHTML = "";
+    adminMessage.hidden = false;
+    adminMessage.textContent = "Загружаю возвраты…";
+
+    try {
+        const response = await fetch("/api/admin-returns", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ initData: tg?.initData || "" }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            if (data.code === "FORBIDDEN") {
+                adminButton.hidden = true;
+                setScreen("home");
+                showMessage("У этого аккаунта нет доступа к админке.");
+                return;
+            }
+
+            throw new Error(data.error || `Admin returns failed: ${response.status}`);
+        }
+
+        renderAdminReturns(Array.isArray(data.returns) ? data.returns : []);
+    } catch (error) {
+        console.error(error);
+        adminMessage.hidden = false;
+        adminMessage.textContent =
+            "Не удалось загрузить возвраты. Попробуй открыть админку ещё раз.";
+    }
+}
+
+async function showAdminScreen() {
+    tapFeedback();
+    setScreen("admin");
+    await loadAdminReturns();
+}
+
+function askConfirmation(message) {
+    return new Promise((resolve) => {
+        if (tg?.showConfirm) {
+            tg.showConfirm(message, resolve);
+        } else {
+            resolve(window.confirm(message));
+        }
+    });
+}
+
+async function handleAdminReturnAction(loanId, action) {
+    if (!loanId || !["approve", "reject"].includes(action)) return;
+
+    const confirmed = await askConfirmation(
+        action === "approve"
+            ? "Подтвердить возврат? Книга снова станет доступна в каталоге."
+            : "Отклонить возврат? Читателю нужно будет отправить новое фото."
+    );
+
+    if (!confirmed) return;
+
+    const card = adminList.querySelector(
+        `[data-loan-id="${CSS.escape(loanId)}"]`
+    );
+
+    const buttons = card?.querySelectorAll("button") || [];
+    buttons.forEach((button) => {
+        button.disabled = true;
+    });
+
+    try {
+        const response = await fetch("/api/admin-return-action", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                initData: tg?.initData || "",
+                loanId,
+                action,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            if (data.code === "NOT_PENDING") {
+                showMessage("Этот возврат уже был обработан.");
+                await loadAdminReturns();
+                return;
+            }
+
+            if (data.code === "FORBIDDEN") {
+                adminButton.hidden = true;
+                setScreen("home");
+                showMessage("У этого аккаунта нет доступа к админке.");
+                return;
+            }
+
+            throw new Error(data.error || `Admin action failed: ${response.status}`);
+        }
+
+        tg?.HapticFeedback?.notificationOccurred("success");
+        catalogLoaded = false;
+
+        showMessage(
+            action === "approve"
+                ? "Возврат подтверждён. Книга снова на полке."
+                : "Возврат отклонён. Читатель может отправить новое фото."
+        );
+
+        await loadAdminReturns();
+    } catch (error) {
+        console.error(error);
+        tg?.HapticFeedback?.notificationOccurred("error");
+        showMessage("Не удалось обработать возврат. Попробуй ещё раз.");
+
+        buttons.forEach((button) => {
+            button.disabled = false;
+        });
+    }
+}
+
 borrowButton.addEventListener("click", startBorrowQrGate);
 returnButton.addEventListener("click", showReturnScreen);
+adminButton.addEventListener("click", showAdminScreen);
 submitReturnButton.addEventListener("click", submitReturnRequest);
