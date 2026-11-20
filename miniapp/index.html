@@ -69,6 +69,14 @@
 
                 <span class="return-arrow" aria-hidden="true">→</span>
             </button>
+
+            <button class="admin-button" id="admin-button" type="button" hidden>
+                <span>
+                    <strong>Админка</strong>
+                    <small>Проверить возвраты</small>
+                </span>
+                <span aria-hidden="true">→</span>
+            </button>
         </section>
 
         <section class="screen" id="catalog-screen" aria-labelledby="catalog-title">
@@ -123,6 +131,19 @@
                     Загружаю данные…
                 </p>
             </section>
+        </section>
+
+        <section class="screen" id="admin-screen" aria-labelledby="admin-title">
+            <header class="screen-header">
+                <p class="eyebrow">АДМИНКА</p>
+                <h1 id="admin-title">Возвраты</h1>
+                <p class="screen-subtitle">
+                    Проверь, что на фото нужная книга стоит на полке «Книг Мира».
+                </p>
+            </header>
+
+            <p class="admin-message" id="admin-message">Загружаю возвраты…</p>
+            <div class="admin-list" id="admin-list" aria-live="polite"></div>
         </section>
 
         <section class="screen" id="book-screen" aria-labelledby="book-title">
