@@ -631,6 +631,170 @@ h2 {
     line-height: 1.45;
 }
 
+.admin-button {
+    width: 100%;
+    margin-top: 14px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+
+    padding: 15px 17px;
+
+    border: 2px solid var(--mir-green);
+    border-radius: 18px;
+
+    background: var(--white);
+    color: var(--mir-green);
+
+    text-align: left;
+    cursor: pointer;
+}
+
+.admin-button > span:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.admin-button strong {
+    font-size: 15px;
+}
+
+.admin-button small {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.admin-button > span:last-child {
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.admin-button:active {
+    transform: translateY(1px);
+}
+
+.admin-message {
+    margin: 0;
+    padding: 20px;
+
+    border: 1.5px solid var(--soft-line);
+    border-radius: 20px;
+
+    background: var(--white);
+    color: var(--muted);
+
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.admin-list {
+    display: grid;
+    gap: 18px;
+}
+
+.admin-return-card {
+    overflow: hidden;
+
+    border: 1.5px solid var(--soft-line);
+    border-radius: 24px;
+
+    background: var(--white);
+}
+
+.admin-photo-wrap {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+
+    overflow: hidden;
+
+    background: var(--mir-cream);
+}
+
+.admin-photo {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+    object-fit: cover;
+}
+
+.admin-photo-placeholder {
+    width: 100%;
+    height: 100%;
+
+    display: grid;
+    place-items: center;
+
+    padding: 20px;
+
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+}
+
+.admin-return-content {
+    padding: 18px;
+}
+
+.admin-return-content h2 {
+    margin-bottom: 7px;
+
+    font-size: 24px;
+    line-height: 1.05;
+    letter-spacing: -0.8px;
+}
+
+.admin-return-user {
+    margin-bottom: 5px;
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.admin-return-time {
+    margin-bottom: 18px;
+
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.admin-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.admin-action {
+    min-width: 0;
+    padding: 13px 10px;
+
+    border: 2px solid var(--mir-green);
+    border-radius: 14px;
+
+    color: var(--mir-green);
+
+    font-size: 13px;
+    font-weight: 900;
+
+    cursor: pointer;
+}
+
+.admin-action.approve {
+    background: var(--mir-lime);
+}
+
+.admin-action.reject {
+    background: var(--white);
+}
+
+.admin-action:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
 [hidden] {
     display: none !important;
 }
