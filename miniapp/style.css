@@ -178,6 +178,64 @@ h2 {
     box-shadow: 2px 2px 0 var(--mir-green);
 }
 
+.my-book-card {
+    margin-top: 22px;
+    padding: 22px;
+
+    border: 1.5px solid var(--soft-line);
+    border-radius: 24px;
+
+    background: var(--white);
+}
+
+.my-book-title {
+    margin: 8px 0 20px;
+
+    font-size: 30px;
+    line-height: 1.02;
+    letter-spacing: -1.1px;
+}
+
+.my-book-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.my-book-meta > div {
+    padding: 14px;
+
+    border: 1.5px solid var(--soft-line);
+    border-radius: 16px;
+
+    background: var(--mir-cream);
+}
+
+.my-book-meta span {
+    display: block;
+    margin-bottom: 6px;
+
+    color: var(--muted);
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.my-book-meta strong {
+    display: block;
+
+    font-size: 14px;
+    line-height: 1.25;
+}
+
+.my-book-card.is-pending {
+    border-color: var(--mir-blue);
+}
+
+.my-book-card.is-pending .my-book-meta > div:last-child {
+    background: rgba(64, 83, 216, 0.08);
+}
+
 .rules {
     margin-top: 36px;
 }
