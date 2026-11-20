@@ -12,6 +12,11 @@ const greetingElement = document.getElementById("greeting");
 const usernameElement = document.getElementById("username");
 const avatarElement = document.getElementById("avatar");
 
+const myBookCard = document.getElementById("my-book-card");
+const myBookTitle = document.getElementById("my-book-title");
+const myBookDue = document.getElementById("my-book-due");
+const myBookStatus = document.getElementById("my-book-status");
+
 const catalogButton = document.getElementById("catalog-button");
 const returnButton = document.getElementById("return-button");
 const adminButton = document.getElementById("admin-button");
@@ -217,6 +222,7 @@ if (tg) {
 
     tg.BackButton?.onClick(handleTelegramBack);
     loadCurrentRole();
+    loadHomeLoan();
 }
 
 catalogButton.addEventListener("click", () => {
@@ -238,6 +244,59 @@ function formatDueDate(isoDate) {
         month: "long",
         year: "numeric",
     }).format(new Date(isoDate));
+}
+
+function formatShortDueDate(isoDate) {
+    if (!isoDate) return "—";
+
+    return new Intl.DateTimeFormat("ru-RU", {
+        day: "numeric",
+        month: "long",
+    }).format(new Date(isoDate));
+}
+
+function renderHomeLoan(loan) {
+    if (!loan) {
+        myBookCard.hidden = true;
+        myBookCard.classList.remove("is-pending");
+        return;
+    }
+
+    myBookCard.hidden = false;
+    myBookTitle.textContent = loan.bookTitle || "Книга";
+    myBookDue.textContent = formatShortDueDate(loan.dueAt);
+
+    if (loan.status === "return_pending") {
+        myBookStatus.textContent = "Возврат на проверке";
+        myBookCard.classList.add("is-pending");
+    } else {
+        myBookStatus.textContent = "На руках";
+        myBookCard.classList.remove("is-pending");
+    }
+}
+
+async function loadHomeLoan() {
+    if (!tg?.initData) {
+        renderHomeLoan(null);
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/my-loan", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ initData: tg.initData }),
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        renderHomeLoan(data.loan || null);
+    } catch (error) {
+        console.error("Failed to load home loan", error);
+    }
 }
 
 async function borrowBook(qrText) {
@@ -317,6 +376,12 @@ async function borrowBook(qrText) {
         book.status = "На руках";
         catalogLoaded = false;
         showBook(book.id);
+
+        renderHomeLoan({
+            bookTitle: book.title,
+            dueAt: data.dueAt,
+            status: "active",
+        });
 
         showMessage(
             `Готово! «${book.title}» теперь у тебя до ${formatDueDate(data.dueAt)}.`
@@ -577,6 +642,7 @@ async function submitReturnRequest() {
         returnStateMessage.textContent =
             "Возврат отправлен на проверку. Пока библиотекарь его не подтвердит, книга остаётся «На руках» и новую взять нельзя.";
 
+        await loadHomeLoan();
         showMessage("Фото отправлено. Возврат ждёт подтверждения библиотекаря.");
     } catch (error) {
         console.error(error);
@@ -780,6 +846,7 @@ async function handleAdminReturnAction(loanId, action) {
             if (data.code === "NOT_PENDING") {
                 showMessage("Этот возврат уже был обработан.");
                 await loadAdminReturns();
+        await loadHomeLoan();
                 return;
             }
 
