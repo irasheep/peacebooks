@@ -846,7 +846,7 @@ async function handleAdminReturnAction(loanId, action) {
             if (data.code === "NOT_PENDING") {
                 showMessage("Этот возврат уже был обработан.");
                 await loadAdminReturns();
-        await loadHomeLoan();
+                await loadHomeLoan();
                 return;
             }
 
@@ -870,6 +870,7 @@ async function handleAdminReturnAction(loanId, action) {
         );
 
         await loadAdminReturns();
+        await loadHomeLoan();
     } catch (error) {
         console.error(error);
         tg?.HapticFeedback?.notificationOccurred("error");
