@@ -130,19 +130,19 @@ async function ensureUser(token, user) {
 
 async function sendStart(botToken, chatId) {
     const text = [
-        "Привет! Это бот книжной полки кофейни МИР (https://share.google/sQ40k2xOwxWehjRBe).",
+        'Привет! Это бот книжной полки кофейни <a href="https://share.google/sQ40k2xOwxWehjRBe">МИР</a>.',
         "",
         "В каталоге можно посмотреть то, что есть на полке в данный момент, а состав будет меняться время от времени.",
         "Книгу можно взять домой одну за раз и просим вернуть не позже, чем через 30 дней.",
         "",
         "По вопросам библиотеки можно писать Ирен @irsheep.",
-        "",
-        "Открывай библиотеку ↓",
     ].join("\n");
 
     return telegramRequest(botToken, "sendMessage", {
         chat_id: chatId,
         text,
+        parse_mode: "HTML",
+        link_preview_options: { is_disabled: true },
         reply_markup: {
             inline_keyboard: [
                 [
