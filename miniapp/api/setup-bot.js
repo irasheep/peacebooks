@@ -59,6 +59,10 @@ module.exports = async function handler(req, res) {
                     command: "start",
                     description: "Открыть Книги Мира",
                 },
+                {
+                    command: "howmuch",
+                    description: "Когда возвращать книгу",
+                },
             ],
         });
 
