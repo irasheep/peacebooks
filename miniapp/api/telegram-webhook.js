@@ -2,6 +2,7 @@ const crypto = require("crypto");
 
 const NOTION_VERSION = "2026-03-11";
 const USERS_DATA_SOURCE_ID = "699ad636-991e-4325-a2e4-0c1d8bfd0335";
+const LOANS_DATA_SOURCE_ID = "05e6acc7-f747-4fa1-af9c-affdbf2c3f28";
 const APP_URL = process.env.APP_URL || "https://peacebooks-mu.vercel.app";
 
 function webhookSecret(botToken) {
@@ -68,6 +69,108 @@ function title(content) {
     return {
         title: [{ type: "text", text: { content: String(content) } }],
     };
+}
+
+function richTextValue(property) {
+    return (property?.rich_text || [])
+        .map((item) => item.plain_text || item.text?.content || "")
+        .join("")
+        .trim();
+}
+
+async function findCurrentLoan(token, telegramId) {
+    const data = await notionRequest(
+        token,
+        `/data_sources/${LOANS_DATA_SOURCE_ID}/query`,
+        {
+            method: "POST",
+            body: JSON.stringify({
+                page_size: 1,
+                sorts: [{ property: "Created time", direction: "descending" }],
+                filter: {
+                    and: [
+                        {
+                            property: "Telegram ID",
+                            rich_text: { equals: telegramId },
+                        },
+                        {
+                            or: [
+                                { property: "Status", select: { equals: "active" } },
+                                { property: "Status", select: { equals: "return_pending" } },
+                            ],
+                        },
+                    ],
+                },
+            }),
+        }
+    );
+
+    return data.results?.[0] || null;
+}
+
+function datePartsInBelgrade(date = new Date()) {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Europe/Belgrade",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+    }).formatToParts(date);
+
+    const values = Object.fromEntries(
+        parts
+            .filter((part) => part.type !== "literal")
+            .map((part) => [part.type, part.value])
+    );
+
+    return {
+        year: Number(values.year),
+        month: Number(values.month),
+        day: Number(values.day),
+    };
+}
+
+function parseDueDate(dueAt) {
+    const match = String(dueAt || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!match) return null;
+
+    return {
+        year: Number(match[1]),
+        month: Number(match[2]),
+        day: Number(match[3]),
+    };
+}
+
+function calendarDaysUntil(dueAt) {
+    const due = parseDueDate(dueAt);
+    if (!due) return null;
+
+    const today = datePartsInBelgrade();
+    const dueUtc = Date.UTC(due.year, due.month - 1, due.day);
+    const todayUtc = Date.UTC(today.year, today.month - 1, today.day);
+
+    return Math.round((dueUtc - todayUtc) / 86400000);
+}
+
+function formatDueDate(dueAt) {
+    const due = parseDueDate(dueAt);
+    if (!due) return null;
+
+    return new Intl.DateTimeFormat("ru-RU", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        timeZone: "UTC",
+    }).format(new Date(Date.UTC(due.year, due.month - 1, due.day)));
+}
+
+function dayWord(value) {
+    const n = Math.abs(value) % 100;
+    const n1 = n % 10;
+
+    if (n > 10 && n < 20) return "дней";
+    if (n1 === 1) return "день";
+    if (n1 >= 2 && n1 <= 4) return "дня";
+    return "дней";
 }
 
 async function findUser(token, telegramId) {
@@ -156,6 +259,53 @@ async function sendStart(botToken, chatId) {
     });
 }
 
+
+async function sendHowMuch(botToken, notionToken, chatId, user) {
+    if (!notionToken) {
+        return telegramRequest(botToken, "sendMessage", {
+            chat_id: chatId,
+            text: "Не удалось проверить выдачу. Попробуй чуть позже.",
+        });
+    }
+
+    const loan = await findCurrentLoan(notionToken, String(user.id));
+
+    if (!loan) {
+        return telegramRequest(botToken, "sendMessage", {
+            chat_id: chatId,
+            text: "Сейчас у тебя нет книг на руках.",
+        });
+    }
+
+    const bookTitle = richTextValue(loan.properties?.["Book Title"]) || "Книгу";
+    const dueAt = loan.properties?.["Due At"]?.date?.start || null;
+    const dueDate = formatDueDate(dueAt);
+    const daysLeft = calendarDaysUntil(dueAt);
+
+    if (!dueDate || daysLeft === null) {
+        return telegramRequest(botToken, "sendMessage", {
+            chat_id: chatId,
+            text: `У тебя на руках «${bookTitle}», но дату возврата сейчас не удалось определить.`,
+        });
+    }
+
+    let timingText;
+
+    if (daysLeft > 0) {
+        timingText = `До возврата осталось ${daysLeft} ${dayWord(daysLeft)}.`;
+    } else if (daysLeft === 0) {
+        timingText = "Вернуть нужно сегодня.";
+    } else {
+        const overdue = Math.abs(daysLeft);
+        timingText = `Срок возврата уже прошёл. Просрочка — ${overdue} ${dayWord(overdue)}.`;
+    }
+
+    return telegramRequest(botToken, "sendMessage", {
+        chat_id: chatId,
+        text: `«${bookTitle}» нужно вернуть до ${dueDate}.\n${timingText}`,
+    });
+}
+
 module.exports = async function handler(req, res) {
     if (req.method !== "POST") {
         return res.status(405).json({ ok: false });
@@ -196,6 +346,13 @@ module.exports = async function handler(req, res) {
             }
 
             await sendStart(botToken, chatId);
+        } else if (
+            message?.chat?.type === "private" &&
+            chatId &&
+            user &&
+            /^\/howmuch(?:@\w+)?(?:\s|$)/i.test(text)
+        ) {
+            await sendHowMuch(botToken, notionToken, chatId, user);
         }
 
         return res.status(200).json({ ok: true });
