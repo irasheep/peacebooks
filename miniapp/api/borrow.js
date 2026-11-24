@@ -4,7 +4,9 @@ const NOTION_VERSION = "2026-03-11";
 const BOOKS_DATA_SOURCE_ID = "3e496b5b-b336-80dd-84bb-000bd8ec8192";
 const USERS_DATA_SOURCE_ID = "699ad636-991e-4325-a2e4-0c1d8bfd0335";
 const LOANS_DATA_SOURCE_ID = "05e6acc7-f747-4fa1-af9c-affdbf2c3f28";
-const MIR_QR_SHA256 = "447db8c1666b435bc74f0c46f94beb4d35fc9cb607c2ef51d0faca92d3f535f2";
+const MIR_QR_SHA256 = "420592ac67b13416c9c71c77e510eb0b9faa29c7ff1b01982bb74b51e99591f5";
+const LEGACY_MIR_QR_SHA256 = "447db8c1666b435bc74f0c46f94beb4d35fc9cb607c2ef51d0faca92d3f535f2";
+const BOT_USERNAME = "bookomirbot";
 const INIT_DATA_MAX_AGE_SECONDS = 24 * 60 * 60;
 
 function safeEqual(a, b) {
@@ -18,9 +20,40 @@ function safeEqual(a, b) {
     return crypto.timingSafeEqual(left, right);
 }
 
+function normalizeQrText(qrText) {
+    const value = String(qrText || "").trim();
+
+    try {
+        const url = new URL(value);
+        const host = url.hostname.toLowerCase().replace(/^www\./, "");
+        const botPath = url.pathname.replace(/^\/+|\/+$/g, "").toLowerCase();
+
+        if (
+            (host === "t.me" || host === "telegram.me") &&
+            botPath === BOT_USERNAME
+        ) {
+            return url.searchParams.get("start") || "";
+        }
+    } catch {
+        // Raw/legacy QR value. Validate it as-is.
+    }
+
+    return value;
+}
+
 function validateQr(qrText) {
-    const hash = crypto.createHash("sha256").update(qrText.trim(), "utf8").digest("hex");
-    return safeEqual(hash, MIR_QR_SHA256);
+    const normalized = normalizeQrText(qrText);
+    if (!normalized) return false;
+
+    const hash = crypto
+        .createHash("sha256")
+        .update(normalized, "utf8")
+        .digest("hex");
+
+    return (
+        safeEqual(hash, MIR_QR_SHA256) ||
+        safeEqual(hash, LEGACY_MIR_QR_SHA256)
+    );
 }
 
 function validateTelegramInitData(initData, botToken) {
